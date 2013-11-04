@@ -7,7 +7,7 @@ A simple CAS client for Clojure, for use as a middleware with Ring.
 To install, add this to your project.clj:
 
 ```clojure
-  :dependencies [[clj-cas-client "0.0.5"]]
+  :dependencies [[clj-cas-client "0.0.6"]]
 ```
 
 To wrap a handler with cas:
@@ -25,7 +25,10 @@ To wrap a handler with cas:
 
 (def app (-> routes
              handler/site
-             (cas cas-server service-name)))
+             (cas cas-server service-name)
+	     wrap-keyword-params
+	     wrap-params
+	     wrap-session))
 ```
 
 This will redirect all requests to the cas server for login, validate the tickets from the cas server, and make sure to add a :username key to the request map.

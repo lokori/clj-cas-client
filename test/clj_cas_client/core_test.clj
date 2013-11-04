@@ -1,3 +1,4 @@
+
 (ns clj-cas-client.core-test
   (:use clj-cas-client.core
         clojure.test)
@@ -16,10 +17,10 @@
 (deftest authentication-filter-test
   (let [af (authentication-filter (fn [r] [:test-authentication-filter r]) (fn [] "cas server fn") (fn [] "service fn"))]
     (is (= (af {:session {"_const_cas_assertion_" "blarg"}}) [:test-authentication-filter {:session {"_const_cas_assertion_" "blarg"}}]))
-    (is (= (af {:params {"ticket" "the tick"}}) [:test-authentication-filter {:params {"ticket" "the tick"}}]))
+    (is (= (af {:query-params {"ticket" "the tick"}}) [:test-authentication-filter {:query-params {"ticket" "the tick"}}]))
     (is (= (af {:session {"_const_cas_assertion_" "blarg"}
-                :params {"ticket" "the tick"}}) [:test-authentication-filter {:session {"_const_cas_assertion_" "blarg"}
-                                                                              :params {"ticket" "the tick"}}]))
+                :query-params {"ticket" "the tick"}}) [:test-authentication-filter {:session {"_const_cas_assertion_" "blarg"}
+                                                                              :query-params {"ticket" "the tick"}}]))
     (is (= (af {}) {:status 302 :headers {"Location" "cas server fn/login?service=service fn"}  :body ""}))))
 
 (def ^:dynamic test-validator (fn [cas-server-fn ticket service] nil))
@@ -39,12 +40,12 @@
                                (is (= ticket "ticket"))
                                (is (= service "service fn"))
                                :assertion)]
-      (is (= (tf {:params {"ticket" "ticket"}})
-             {:res [:test-ticket-validation-filter {:params {"ticket" "ticket"
-                                                             "_const_cas_assertion_" :assertion}}] :session {"_const_cas_assertion_" :assertion}})))
+      (is (= (tf {:query-params {"ticket" "ticket"}})
+             {:res [:test-ticket-validation-filter {:query-params {"ticket" "ticket"}
+                                                    :params {"_const_cas_assertion_" :assertion}}] :session {"_const_cas_assertion_" :assertion}})))
 
     (binding [test-validator (fn [cas-server-fn ticket service] (throw (TicketValidationException. "blah")))]
-      (is (= (tf {:params {"ticket" "ticket"}})
+      (is (= (tf {:query-params {"ticket" "ticket"}})
              {:status 403})))))
 
 (deftest user-principal-filter-test
